@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>GoTo-Device-Manager</Name>
+  <Repository>goto-device-manager</Repository>
+  <Registry>https://hub.docker.com/</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>bash</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/your-username/goto-device-locator</Support>
+  <Project>https://github.com/your-username/goto-device-locator</Project>
+  <Overview>GoTo Connect Device Location Manager - A comprehensive web application for managing GoTo Connect devices, locations, and phone numbers. Features include device management, location tracking, phone number administration, and real-time API integration.</Overview>
+  <Category>Tools: Network:Web Network:Management</Category>
+  <WebUI>http://[IP]:[PORT:5000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/your-username/goto-device-locator/main/unraid-template.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/your-username/goto-device-locator/main/icon.png</Icon>
+  <ExtraParams>--restart=unless-stopped</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="WebUI Port" Target="5000" Default="5000" Mode="tcp" Description="Port for accessing the web interface" Type="Port" Display="always" Required="true" Mask="false">5000</Config>
+  <Config Name="GoTo Client ID" Target="GOTO_CLIENT_ID" Default="" Mode="" Description="Your GoTo Connect OAuth Client ID from the Developer Portal" Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="GoTo Client Secret" Target="GOTO_CLIENT_SECRET" Default="" Mode="" Description="Your GoTo Connect OAuth Client Secret from the Developer Portal" Type="Variable" Display="always" Required="true" Mask="true"/>
+  <Config Name="Redirect URI" Target="GOTO_REDIRECT_URI" Default="http://localhost:5000/callback" Mode="" Description="OAuth redirect URI (update with your server IP/domain)" Type="Variable" Display="always" Required="true" Mask="false">http://localhost:5000/callback</Config>
+  <Config Name="Secret Key" Target="SECRET_KEY" Default="" Mode="" Description="Application secret key for session security (leave empty for auto-generation)" Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="App Title" Target="APP_TITLE" Default="GoTo Device Location Manager" Mode="" Description="Custom application title" Type="Variable" Display="advanced" Required="false" Mask="false">GoTo Device Location Manager</Config>
+  <Config Name="Log Level" Target="LOG_LEVEL" Default="INFO" Mode="" Description="Application log level (DEBUG, INFO, WARNING, ERROR)" Type="Variable" Display="advanced" Required="false" Mask="false">INFO</Config>
+  <Config Name="Session Timeout" Target="SESSION_TIMEOUT" Default="3600" Mode="" Description="Session timeout in seconds" Type="Variable" Display="advanced" Required="false" Mask="false">3600</Config>
+  <Config Name="Data Storage" Target="/app/data" Default="/mnt/user/appdata/goto-device-manager/data" Mode="rw" Description="Persistent data storage for application data" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/goto-device-manager/data</Config>
+  <Config Name="Log Storage" Target="/app/logs" Default="/mnt/user/appdata/goto-device-manager/logs" Mode="rw" Description="Log file storage location" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/goto-device-manager/logs</Config>
+  <Config Name="Config Storage" Target="/app/config" Default="/mnt/user/appdata/goto-device-manager/config" Mode="ro" Description="Optional configuration files (read-only)" Type="Path" Display="advanced" Required="false" Mask="false">/mnt/user/appdata/goto-device-manager/config</Config>
+</Container>

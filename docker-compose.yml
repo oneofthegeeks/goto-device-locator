@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  goto-device-manager:
+    build: .
+    container_name: goto-device-manager
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      # GoTo Connect OAuth Configuration
+      - GOTO_CLIENT_ID=${GOTO_CLIENT_ID}
+      - GOTO_CLIENT_SECRET=${GOTO_CLIENT_SECRET}
+      - GOTO_REDIRECT_URI=${GOTO_REDIRECT_URI:-http://localhost:5000/callback}
+      # Application Configuration
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-this}
+      - APP_TITLE=${APP_TITLE:-GoTo Device Location Manager}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # Session Configuration
+      - SESSION_TIMEOUT=${SESSION_TIMEOUT:-3600}
+    volumes:
+      # Persistent data storage
+      - ./data:/app/data
+      # Log storage
+      - ./logs:/app/logs
+      # Configuration file (optional)
+      - ./config:/app/config:ro
+    networks:
+      - goto-network
+    labels:
+      - "com.docker.compose.project=goto-device-manager"
+      - "description=GoTo Connect Device Location Manager"
+
+networks:
+  goto-network:
+    driver: bridge
+
+# For production with external database (optional)
+# Uncomment if you want to add Redis for session storage
+#  redis:
+#    image: redis:7-alpine
+#    container_name: goto-redis
+#    restart: unless-stopped
+#    volumes:
+#      - redis-data:/data
+#    networks:
+#      - goto-network
+#    command: redis-server --appendonly yes
+#
+#volumes:
+#  redis-data:

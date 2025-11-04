@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Device Models - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-phone me-2"></i>Device Models</h2>
+            <p class="text-muted mb-0">View supported device models and their specifications</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+
+    {% if device_models %}
+    <!-- Device Models Grid -->
+    <div class="row">
+        {% for model in device_models %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ model.name or 'Unknown Model' }}</h5>
+                    {% if model.manufacturer %}
+                    <small class="text-muted">{{ model.manufacturer }}</small>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% if model.partNumber %}
+                        <div class="col-12 mb-2">
+                            <strong>Part Number:</strong>
+                            <span class="badge bg-light text-dark">{{ model.partNumber }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if model.deviceType %}
+                        <div class="col-12 mb-2">
+                            <strong>Device Type:</strong>
+                            <span class="badge bg-primary">{{ model.deviceType }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if model.capabilities %}
+                        <div class="col-12 mb-2">
+                            <strong>Capabilities:</strong>
+                            <div class="mt-1">
+                                {% for capability in model.capabilities %}
+                                <span class="badge bg-info me-1 mb-1">{{ capability }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if model.features %}
+                        <div class="col-12 mb-2">
+                            <strong>Features:</strong>
+                            <div class="mt-1">
+                                {% for feature in model.features %}
+                                <span class="badge bg-success me-1 mb-1">{{ feature }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if model.supportedVersions %}
+                        <div class="col-12 mb-2">
+                            <strong>Supported Versions:</strong>
+                            <ul class="list-unstyled mt-1">
+                                {% for version in model.supportedVersions %}
+                                <li><small class="text-muted">• {{ version }}</small></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
+                        {% if model.description %}
+                        <div class="col-12 mb-2">
+                            <strong>Description:</strong>
+                            <p class="small text-muted mt-1">{{ model.description }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    {% if model.isSupported %}
+                    <span class="badge bg-success"><i class="bi bi-check-circle"></i> Supported</span>
+                    {% else %}
+                    <span class="badge bg-warning"><i class="bi bi-exclamation-triangle"></i> Limited Support</span>
+                    {% endif %}
+                    
+                    {% if model.id %}
+                    <div class="mt-2">
+                        <small>Model ID: {{ model.id }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Summary Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Device Model Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h4 class="text-primary">{{ device_models|length }}</h4>
+                                <small class="text-muted">Total Models</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h4 class="text-success">{{ device_models|selectattr('isSupported')|list|length }}</h4>
+                                <small class="text-muted">Fully Supported</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h4 class="text-info">{{ device_models|map(attribute='manufacturer')|unique|list|length }}</h4>
+                                <small class="text-muted">Manufacturers</small>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="border rounded p-3 text-center">
+                                <h4 class="text-warning">{{ device_models|map(attribute='deviceType')|unique|list|length }}</h4>
+                                <small class="text-muted">Device Types</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Device Type Breakdown -->
+    {% set device_types = device_models|groupby('deviceType') %}
+    {% if device_types %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Device Types Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Device Type</th>
+                                    <th>Count</th>
+                                    <th>Manufacturers</th>
+                                    <th>Example Models</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for device_type, models in device_types %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ device_type or 'Unknown' }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ models|list|length }}</span>
+                                    </td>
+                                    <td>
+                                        {% set manufacturers = models|map(attribute='manufacturer')|unique|list %}
+                                        {% for manufacturer in manufacturers[:3] %}
+                                        <span class="badge bg-light text-dark me-1">{{ manufacturer }}</span>
+                                        {% endfor %}
+                                        {% if manufacturers|length > 3 %}
+                                        <span class="text-muted">+{{ manufacturers|length - 3 }} more</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% for model in models[:2] %}
+                                        <small class="text-muted">{{ model.name }}{% if not loop.last %}, {% endif %}</small>
+                                        {% endfor %}
+                                        {% if models|list|length > 2 %}
+                                        <small class="text-muted">+{{ models|list|length - 2 }} more</small>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-phone text-muted" style="font-size: 4rem;"></i>
+        <h4 class="mt-3">No Device Models Found</h4>
+        <p class="text-muted">No device models are currently available for this account.</p>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Phone Number Details - {{ phone_number.extension if phone_number.extension else phone_number.number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Navigation Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('phone_numbers') }}">Phone Numbers</a></li>
+            <li class="breadcrumb-item active" aria-current="page">
+                {{ phone_number.extension if phone_number.extension else phone_number.number }}
+            </li>
+        </ol>
+    </nav>
+
+    <!-- Phone Number Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-phone me-2 text-primary"></i>
+                        {{ phone_number.extension if phone_number.extension else phone_number.number }}
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Phone Number Details
+                        {% if phone_number.type %}
+                            <span class="badge bg-secondary ms-2">{{ phone_number.type|title }}</span>
+                        {% endif %}
+                        {% if phone_number.status %}
+                            <span class="badge {% if phone_number.status.lower() == 'active' %}bg-success{% else %}bg-warning{% endif %} ms-1">
+                                {{ phone_number.status|title }}
+                            </span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="mt-3 mt-md-0">
+                    <a href="{{ url_for('phone_numbers') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Phone Numbers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phone Number Information Cards -->
+    <div class="row g-4">
+        <!-- Basic Information -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Basic Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-bold">Phone Number</label>
+                            <p class="mb-0">{{ phone_number.number if phone_number.number else 'N/A' }}</p>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-bold">Extension</label>
+                            <p class="mb-0">{{ phone_number.extension if phone_number.extension else 'N/A' }}</p>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-bold">Type</label>
+                            <p class="mb-0">{{ phone_number.type|title if phone_number.type else 'N/A' }}</p>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <label class="form-label fw-bold">Status</label>
+                            <p class="mb-0">
+                                <span class="badge {% if phone_number.status and phone_number.status.lower() == 'active' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ phone_number.status|title if phone_number.status else 'Unknown' }}
+                                </span>
+                            </p>
+                        </div>
+                        {% if phone_number.id %}
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Phone Number ID</label>
+                            <p class="mb-0 font-monospace text-muted small">{{ phone_number.id }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assignment Information -->
+        <div class="col-12 col-lg-6">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-tag me-2"></i>Assignment Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% if phone_number.assignedTo %}
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Assigned To</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user me-2 text-primary"></i>
+                                <div>
+                                    <p class="mb-0">{{ phone_number.assignedTo.name if phone_number.assignedTo.name else 'Unknown User' }}</p>
+                                    {% if phone_number.assignedTo.email %}
+                                    <small class="text-muted">{{ phone_number.assignedTo.email }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if phone_number.location %}
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Location</label>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-map-marker-alt me-2 text-success"></i>
+                                <div>
+                                    <p class="mb-0">
+                                        <a href="{{ url_for('location_details', location_id=phone_number.location.id) }}" class="text-decoration-none">
+                                            {{ phone_number.location.name if phone_number.location.name else 'Unknown Location' }}
+                                        </a>
+                                    </p>
+                                    {% if phone_number.location.address %}
+                                    <small class="text-muted">{{ phone_number.location.address }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if not phone_number.assignedTo and not phone_number.location %}
+                        <div class="col-12">
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+                                <p class="mb-0">No assignment information available</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features & Capabilities -->
+        {% if phone_number.features or phone_number.capabilities %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cogs me-2"></i>Features & Capabilities
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% if phone_number.features %}
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold">Features</label>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for feature in phone_number.features %}
+                                <span class="badge bg-primary">{{ feature|title }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if phone_number.capabilities %}
+                        <div class="col-12 col-md-6">
+                            <label class="form-label fw-bold">Capabilities</label>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for capability in phone_number.capabilities %}
+                                <span class="badge bg-info">{{ capability|title }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Technical Details -->
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info me-2"></i>Technical Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% if phone_number.provider %}
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <label class="form-label fw-bold">Provider</label>
+                            <p class="mb-0">{{ phone_number.provider|title }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if phone_number.routing %}
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <label class="form-label fw-bold">Routing</label>
+                            <p class="mb-0">{{ phone_number.routing|title }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if phone_number.createdAt %}
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <label class="form-label fw-bold">Created</label>
+                            <p class="mb-0">{{ phone_number.createdAt|strftime('%Y-%m-%d') if phone_number.createdAt else 'N/A' }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if phone_number.updatedAt %}
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <label class="form-label fw-bold">Updated</label>
+                            <p class="mb-0">{{ phone_number.updatedAt|strftime('%Y-%m-%d') if phone_number.updatedAt else 'N/A' }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        {% if not phone_number.provider and not phone_number.routing and not phone_number.createdAt and not phone_number.updatedAt %}
+                        <div class="col-12">
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-info-circle fa-2x mb-2"></i>
+                                <p class="mb-0">No technical details available</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Custom responsive styles for phone number details */
+@media (max-width: 768px) {
+    .card-header h5 {
+        font-size: 1rem;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+    }
+    
+    .breadcrumb {
+        font-size: 0.875rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+{% endblock %}

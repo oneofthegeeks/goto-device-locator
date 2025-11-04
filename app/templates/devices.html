@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="bi bi-router me-2"></i>Devices</h2>
+                    <p class="text-muted mb-0">Account: {{ account_key }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if devices %}
+    <div class="row">
+        <div class="col-12 mb-3">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Found {{ devices|length }} device(s). Click on a device to view detailed information.
+            </div>
+        </div>
+        
+        {% for device in devices %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card device-card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Device</h6>
+                    <span class="badge {% if device.status == 'READY' %}bg-success{% elif device.status == 'OFFLINE' %}bg-secondary{% else %}bg-warning{% endif %}">
+                        {% if device.status %}{{ device.status }}{% else %}Unknown{% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Device ID:</strong><br>
+                        <code class="small">{{ device.id }}</code>
+                    </div>
+                    
+                    {% if device.licenseKey %}
+                    <div class="mb-3">
+                        <strong>License Key:</strong><br>
+                        <code class="small">{{ device.licenseKey }}</code>
+                    </div>
+                    {% endif %}
+                    
+                    {% if device.locationId %}
+                    <div class="mb-3">
+                        <strong>Location ID:</strong><br>
+                        <code class="small">{{ device.locationId }}</code>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <strong>Status:</strong><br>
+                        <span class="{% if device.status == 'READY' %}status-ready{% elif device.status == 'OFFLINE' %}status-offline{% else %}status-unknown{% endif %}">
+                            <i class="bi {% if device.status == 'READY' %}bi-check-circle-fill{% elif device.status == 'OFFLINE' %}bi-x-circle-fill{% else %}bi-question-circle-fill{% endif %} me-1"></i>
+                            {% if device.status %}{{ device.status }}{% else %}Unknown{% endif %}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-primary btn-sm" onclick="showDeviceDetails('{{ device.id }}')">
+                        <i class="bi bi-eye me-1"></i>View Details
+                    </button>
+                    {% if device.locationId %}
+                    <a href="{{ url_for('location_detail', location_id=device.locationId) }}" 
+                       class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-geo-alt me-1"></i>View Location
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if next_page_marker %}
+    <div class="row">
+        <div class="col-12 text-center">
+            <a href="{{ url_for('devices', account_key=account_key, page_marker=next_page_marker) }}" 
+               class="btn btn-outline-primary">
+                <i class="bi bi-arrow-right me-1"></i>Load More Devices
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-router text-muted mb-3" style="font-size: 4rem;"></i>
+                    <h4>No Devices Found</h4>
+                    <p class="text-muted">
+                        No devices were found for this account. This could mean:
+                    </p>
+                    <ul class="list-unstyled text-muted">
+                        <li>• The account key is incorrect</li>
+                        <li>• You don't have permission to view devices</li>
+                        <li>• No devices have been configured yet</li>
+                    </ul>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Device Details Modal -->
+<div class="modal fade" id="deviceDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Device Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="deviceDetailsContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading device details...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDeviceDetails(deviceId) {
+    const modal = new bootstrap.Modal(document.getElementById('deviceDetailsModal'));
+    const content = document.getElementById('deviceDetailsContent');
+    
+    // Reset content
+    content.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading device details...</p>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Fetch device details
+    fetch(`{{ url_for('api_device_details', device_id='DEVICE_ID') }}`.replace('DEVICE_ID', deviceId))
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Error loading device details: ${data.error}
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="row">';
+            
+            // Device Information
+            html += `
+                <div class="col-md-6">
+                    <h6>Device Information</h6>
+                    <table class="table table-sm">
+                        <tr><th>ID:</th><td><code>${data.id || 'N/A'}</code></td></tr>
+                        <tr><th>Status:</th><td><span class="badge ${getStatusBadgeClass(data.status)}">${data.status || 'Unknown'}</span></td></tr>
+                        <tr><th>License Key:</th><td><code>${data.licenseKey || 'N/A'}</code></td></tr>
+                        <tr><th>Location ID:</th><td><code>${data.locationId || 'N/A'}</code></td></tr>
+                    </table>
+                </div>
+            `;
+            
+            // Additional Properties
+            html += '<div class="col-md-6"><h6>Additional Properties</h6><table class="table table-sm">';
+            
+            for (const [key, value] of Object.entries(data)) {
+                if (!['id', 'status', 'licenseKey', 'locationId'].includes(key)) {
+                    html += `<tr><th>${key}:</th><td>${formatValue(value)}</td></tr>`;
+                }
+            }
+            
+            html += '</table></div></div>';
+            
+            content.innerHTML = html;
+        })
+        .catch(error => {
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Error loading device details: ${error.message}
+                </div>
+            `;
+        });
+}
+
+function getStatusBadgeClass(status) {
+    switch(status) {
+        case 'READY': return 'bg-success';
+        case 'OFFLINE': return 'bg-secondary';
+        default: return 'bg-warning';
+    }
+}
+
+function formatValue(value) {
+    if (value === null || value === undefined) return 'N/A';
+    if (typeof value === 'object') return '<code>' + JSON.stringify(value, null, 2) + '</code>';
+    if (typeof value === 'string' && value.length > 50) return '<small>' + value + '</small>';
+    return value;
+}
+</script>
+
+<style>
+.device-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.device-card:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}
