@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2><i class="bi bi-diagram-3 me-2"></i>Devices by Location</h2>
+                    <p class="text-muted mb-0">Account: {{ account_key }} | Total Devices: {{ total_devices }}</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if locations_with_devices %}
+    <div class="row">
+        <div class="col-12 mb-3">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Found {{ locations_with_devices|length }} location(s) with devices. 
+                Expand each location to see its assigned devices.
+            </div>
+        </div>
+        
+        {% for location_name, location_data in locations_with_devices.items() %}
+        <div class="col-12 mb-4">
+            <div class="card location-card {% if location_data.used_for_emergency %}emergency-location{% endif %}">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <button class="btn btn-link p-0 text-decoration-none" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#location-{{ loop.index }}" 
+                                        aria-expanded="false">
+                                    <i class="bi bi-chevron-right me-2 collapse-icon"></i>
+                                    {{ location_name }}
+                                </button>
+                            </h5>
+                            <small class="text-muted">{{ location_data.devices|length }} device(s)</small>
+                        </div>
+                        <div>
+                            {% if location_data.used_for_emergency %}
+                            <span class="badge bg-danger me-2">Emergency Location</span>
+                            {% endif %}
+                            <a href="{{ url_for('location_detail', location_id=location_data.location_id) }}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye me-1"></i>Location Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapse" id="location-{{ loop.index }}">
+                    <div class="card-body">
+                        {% if location_data.location_address %}
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-geo-alt me-2"></i>Address</h6>
+                                <address class="small mb-0">
+                                    {% if location_data.location_address.line1 %}{{ location_data.location_address.line1 }}<br>{% endif %}
+                                    {% if location_data.location_address.line2 %}{{ location_data.location_address.line2 }}<br>{% endif %}
+                                    {% if location_data.location_address.city %}{{ location_data.location_address.city }}{% endif %}{% if location_data.location_address.state %}, {{ location_data.location_address.state }}{% endif %}{% if location_data.location_address.postalCode %} {{ location_data.location_address.postalCode }}{% endif %}<br>
+                                    {% if location_data.location_address.country %}{{ location_data.location_address.country }}{% endif %}
+                                </address>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-shield-check me-2"></i>Emergency Services</h6>
+                                <span class="badge {% if location_data.used_for_emergency %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {% if location_data.used_for_emergency %}Enabled{% else %}Disabled{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <hr>
+                        {% endif %}
+                        
+                        <h6><i class="bi bi-router me-2"></i>Devices ({{ location_data.devices|length }})</h6>
+                        <div class="row">
+                            {% for device in location_data.devices %}
+                            <div class="col-lg-6 col-xl-4 mb-3">
+                                <div class="card device-card">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-0">Device</h6>
+                                            <span class="badge {% if device.device_status == 'READY' %}bg-success{% elif device.device_status == 'OFFLINE' %}bg-secondary{% else %}bg-warning{% endif %}">
+                                                {{ device.device_status or 'Unknown' }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="mb-2">
+                                            <strong>ID:</strong><br>
+                                            <code class="small">{{ device.device_id }}</code>
+                                        </div>
+                                        
+                                        {% if device.license_key %}
+                                        <div class="mb-2">
+                                            <strong>License:</strong><br>
+                                            <code class="small">{{ device.license_key }}</code>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="mb-2">
+                                            <strong>Status:</strong><br>
+                                            <span class="{% if device.device_status == 'READY' %}status-ready{% elif device.device_status == 'OFFLINE' %}status-offline{% else %}status-unknown{% endif %}">
+                                                <i class="bi {% if device.device_status == 'READY' %}bi-check-circle-fill{% elif device.device_status == 'OFFLINE' %}bi-x-circle-fill{% else %}bi-question-circle-fill{% endif %} me-1"></i>
+                                                {{ device.device_status or 'Unknown' }}
+                                            </span>
+                                        </div>
+                                        
+                                        <button class="btn btn-primary btn-sm" onclick="showDeviceDetails('{{ device.device_id }}')">
+                                            <i class="bi bi-eye me-1"></i>Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-diagram-3 text-muted mb-3" style="font-size: 4rem;"></i>
+                    <h4>No Device Location Data Found</h4>
+                    <p class="text-muted">
+                        No devices with location information were found for this account. This could mean:
+                    </p>
+                    <ul class="list-unstyled text-muted">
+                        <li>• The account key is incorrect</li>
+                        <li>• You don't have permission to view devices or locations</li>
+                        <li>• No devices have been assigned to locations yet</li>
+                        <li>• No locations have been configured</li>
+                    </ul>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">
+                        <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Device Details Modal -->
+<div class="modal fade" id="deviceDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Device Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="deviceDetailsContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading device details...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Handle collapse icon rotation
+document.addEventListener('DOMContentLoaded', function() {
+    const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+    
+    collapseElements.forEach(element => {
+        const target = document.querySelector(element.getAttribute('data-bs-target'));
+        const icon = element.querySelector('.collapse-icon');
+        
+        target.addEventListener('show.bs.collapse', function() {
+            icon.classList.remove('bi-chevron-right');
+            icon.classList.add('bi-chevron-down');
+        });
+        
+        target.addEventListener('hide.bs.collapse', function() {
+            icon.classList.remove('bi-chevron-down');
+            icon.classList.add('bi-chevron-right');
+        });
+    });
+});
+
+function showDeviceDetails(deviceId) {
+    const modal = new bootstrap.Modal(document.getElementById('deviceDetailsModal'));
+    const content = document.getElementById('deviceDetailsContent');
+    
+    // Reset content
+    content.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading device details...</p>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Fetch device details
+    fetch(`{{ url_for('api_device_details', device_id='DEVICE_ID') }}`.replace('DEVICE_ID', deviceId))
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Error loading device details: ${data.error}
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="row">';
+            
+            // Device Information
+            html += `
+                <div class="col-md-6">
+                    <h6>Device Information</h6>
+                    <table class="table table-sm">
+                        <tr><th>ID:</th><td><code>${data.id || 'N/A'}</code></td></tr>
+                        <tr><th>Status:</th><td><span class="badge ${getStatusBadgeClass(data.status)}">${data.status || 'Unknown'}</span></td></tr>
+                        <tr><th>License Key:</th><td><code>${data.licenseKey || 'N/A'}</code></td></tr>
+                        <tr><th>Location ID:</th><td><code>${data.locationId || 'N/A'}</code></td></tr>
+                    </table>
+                </div>
+            `;
+            
+            // Additional Properties
+            html += '<div class="col-md-6"><h6>Additional Properties</h6><table class="table table-sm">';
+            
+            for (const [key, value] of Object.entries(data)) {
+                if (!['id', 'status', 'licenseKey', 'locationId'].includes(key)) {
+                    html += `<tr><th>${key}:</th><td>${formatValue(value)}</td></tr>`;
+                }
+            }
+            
+            html += '</table></div></div>';
+            
+            content.innerHTML = html;
+        })
+        .catch(error => {
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Error loading device details: ${error.message}
+                </div>
+            `;
+        });
+}
+
+function getStatusBadgeClass(status) {
+    switch(status) {
+        case 'READY': return 'bg-success';
+        case 'OFFLINE': return 'bg-secondary';
+        default: return 'bg-warning';
+    }
+}
+
+function formatValue(value) {
+    if (value === null || value === undefined) return 'N/A';
+    if (typeof value === 'object') return '<code>' + JSON.stringify(value, null, 2) + '</code>';
+    if (typeof value === 'string' && value.length > 50) return '<small>' + value + '</small>';
+    return value;
+}
+</script>
+
+<style>
+.device-card {
+    transition: transform 0.2s ease-in-out;
+    height: 100%;
+}
+
+.device-card:hover {
+    transform: translateY(-2px);
+}
+
+.collapse-icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+address {
+    line-height: 1.4;
+}
+</style>
+{% endblock %}

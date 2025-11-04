@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+                <div>
+                    <h2 class="mb-1"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h2>
+                    <p class="text-muted mb-0">Welcome to your GoTo Connect device and location management dashboard.</p>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    <span class="badge bg-primary">{{ session.get('access_token', {}).get('account_name', 'Connected') if session.get('access_token') else 'Not Connected' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Key Input -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-key-fill me-2"></i>Account Information</h5>
+                </div>
+                <div class="card-body">
+                    <form id="accountForm" method="POST" action="{{ url_for('dashboard') }}">
+                        <div class="row g-3">
+                            <div class="col-12 col-lg-8">
+                                <label for="accountKey" class="form-label fw-bold">Account Key</label>
+                                <input type="text" class="form-control form-control-lg" id="accountKey" name="account_key"
+                                       placeholder="Enter your GoTo Connect Account Key" required
+                                       value="{{ account_key or '' }}">
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    You can find your account key in the GoTo Connect admin portal or through the Admin API.
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-4">
+                                <label class="form-label d-none d-lg-block">&nbsp;</label>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="bi bi-check-lg me-1"></i>Set Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Cards -->
+    <div class="row g-4" id="actionCards" style="display: none;">
+        <div class="col-12 mb-2">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                <div>
+                    <h4 class="mb-1">Explore Your Data</h4>
+                    <p class="text-muted mb-0">Choose an option below to view your devices and locations.</p>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    <small class="text-muted">
+                        <i class="bi bi-clock me-1"></i>Data refreshed in real-time
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Primary Actions -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-geo-alt-fill text-primary" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="card-title mb-3">View Locations</h5>
+                    <p class="card-text mb-4">
+                        Browse all locations in your organization. View address information, 
+                        emergency service settings, and assigned resources.
+                    </p>
+                    <a href="{{ url_for('locations') }}" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-eye me-2"></i>View Locations
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-router text-success" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="card-title mb-3">View Devices</h5>
+                    <p class="card-text mb-4">
+                        Browse all devices in your organization. Check device status, 
+                        license keys, and operational information.
+                    </p>
+                    <a href="{{ url_for('devices') }}" class="btn btn-success btn-lg w-100">
+                        <i class="bi bi-phone me-2"></i>View Devices
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-diagram-3 text-info" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Devices by Location</h5>
+                    <p class="card-text mb-4">
+                        View all devices organized by their assigned locations. 
+                        Perfect for understanding your deployment topology.
+                    </p>
+                    <a href="{{ url_for('device_locations') }}" class="btn btn-info btn-lg w-100">
+                        <i class="bi bi-eye me-2"></i>View by Location
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Actions -->
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-telephone text-warning" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Phone Numbers</h5>
+                    <p class="card-text mb-4">
+                        View all phone numbers in your organization. Check routing, 
+                        caller ID settings, and number assignments.
+                    </p>
+                    <a href="{{ url_for('phone_numbers') }}" class="btn btn-warning btn-lg w-100">
+                        <i class="bi bi-list me-2"></i>View Numbers
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-grid-3x3-gap" style="font-size: 3.5rem; color: #6f42c1;"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Extensions</h5>
+                    <p class="card-text mb-4">
+                        Browse all extensions including direct lines, call queues, 
+                        ring groups, and conference bridges.
+                    </p>
+                    <a href="{{ url_for('extensions') }}" class="btn btn-outline-dark btn-lg w-100">
+                        <i class="bi bi-grid me-2"></i>View Extensions
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-cpu text-secondary" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Device Models</h5>
+                    <p class="card-text mb-4">
+                        View all available device models and their specifications. 
+                        Useful for planning deployments and understanding capabilities.
+                    </p>
+                    <a href="{{ url_for('device_models') }}" class="btn btn-secondary btn-lg w-100">
+                        <i class="bi bi-list-ul me-2"></i>View Models
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Management Section -->
+    <div class="row g-4 mt-2" id="enhancedFeatures" style="display: none;">
+        <div class="col-12">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+                <div>
+                    <h4 class="mb-1">Enhanced Management</h4>
+                    <p class="text-muted mb-0">Advanced administrative tools and detailed information.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-card border-warning">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-gear text-warning" style="font-size: 3.5rem;"></i>
+                    </div>
+                    <h5 class="card-title mb-3">Device Management</h5>
+                    <p class="card-text mb-4">
+                        Control and manage your devices with reboot, resync, and bulk operations. 
+                        Administrative tools for device maintenance.
+                    </p>
+                    <a href="{{ url_for('device_management') }}" class="btn btn-warning btn-lg w-100">
+                        <i class="bi bi-gear me-2"></i>Manage Devices
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-4 mt-2" id="statsSection" style="display: none;">
+        <div class="col-12 mb-2">
+            <h4>Quick Information</h4>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card bg-light border-0 h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-info-circle text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h6 class="card-title">API Endpoints</h6>
+                    <p class="card-text text-muted mb-0">
+                        This application uses the GoTo Connect Voice Admin API to retrieve 
+                        device and location information.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card bg-light border-0 h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-shield-check text-success mb-3" style="font-size: 3rem;"></i>
+                    <h6 class="card-title">Secure Access</h6>
+                    <p class="card-text text-muted mb-0">
+                        All API calls are authenticated using OAuth 2.0 with automatic 
+                        token refresh for secure access.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card bg-light border-0 h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-clock text-warning mb-3" style="font-size: 3rem;"></i>
+                    <h6 class="card-title">Real-time Data</h6>
+                    <p class="card-text text-muted mb-0">
+                        Device and location information is fetched in real-time 
+                        from your GoTo Connect organization.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for enhanced responsiveness -->
+<style>
+.hover-card {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.125);
+}
+
+.hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    border-color: rgba(0,123,255,0.25);
+}
+
+/* Mobile optimizations */
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.75rem;
+    }
+    
+    h4 {
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+    }
+    
+    .card-text {
+        font-size: 0.95rem;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 577px) and (max-width: 991px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+}
+
+/* Desktop optimizations */
+@media (min-width: 992px) {
+    .card-body {
+        padding: 2.5rem !important;
+    }
+    
+    .hover-card:hover .card-title {
+        color: #0d6efd;
+    }
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Form styling */
+.form-control-lg {
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+}
+
+/* Responsive icons */
+@media (max-width: 576px) {
+    .card-body i[style*="font-size"] {
+        font-size: 2.5rem !important;
+    }
+}
+</style>
+
+<script>
+// Show action cards if account key is already set
+document.addEventListener('DOMContentLoaded', function() {
+    const accountKeyInput = document.getElementById('accountKey');
+    if (accountKeyInput && accountKeyInput.value.trim()) {
+        document.getElementById('actionCards').style.display = 'block';
+        document.getElementById('enhancedFeatures').style.display = 'block';
+        document.getElementById('statsSection').style.display = 'block';
+    }
+    
+    // Add smooth scroll behavior for better UX
+    document.documentElement.style.scrollBehavior = 'smooth';
+});
+
+// Form submission feedback
+document.getElementById('accountForm').addEventListener('submit', function(e) {
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Setting...';
+    submitBtn.disabled = true;
+    
+    // Re-enable button after a delay in case of errors
+    setTimeout(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }, 3000);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Error - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-exclamation-triangle text-danger mb-4" style="font-size: 4rem;"></i>
+                    
+                    <h2 class="text-danger mb-3">
+                        {% if error_title %}
+                            {{ error_title }}
+                        {% else %}
+                            An Error Occurred
+                        {% endif %}
+                    </h2>
+                    
+                    <p class="lead text-muted mb-4">
+                        {% if error_message %}
+                            {{ error_message }}
+                        {% else %}
+                            We're sorry, but something went wrong while processing your request.
+                        {% endif %}
+                    </p>
+                    
+                    {% if error_details and config.DEBUG %}
+                    <div class="alert alert-secondary text-start mt-4">
+                        <h6><i class="bi bi-info-circle me-2"></i>Debug Information:</h6>
+                        <pre class="small mb-0">{{ error_details }}</pre>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary me-2">
+                            <i class="bi bi-house me-1"></i>Return to Dashboard
+                        </a>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Go Back
+                        </a>
+                    </div>
+                    
+                    {% if not session.get('authenticated') %}
+                    <div class="mt-3">
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-shield-lock me-1"></i>Login Again
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Helpful Information -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="bi bi-lightbulb me-2"></i>What you can try:</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-arrow-clockwise text-primary me-2"></i>
+                            Refresh the page and try again
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-shield-check text-success me-2"></i>
+                            Make sure you're properly authenticated with GoTo Connect
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-wifi text-info me-2"></i>
+                            Check your internet connection
+                        </li>
+                        <li class="mb-0">
+                            <i class="bi bi-question-circle text-warning me-2"></i>
+                            Contact your administrator if the problem persists
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
