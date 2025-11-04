@@ -52,7 +52,7 @@ A comprehensive web application for managing GoTo Connect devices, locations, an
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/goto-device-locator.git
+git clone https://github.com/oneofthegeeks/goto-device-locator.git
 cd goto-device-locator
 
 # Set up environment
@@ -77,7 +77,7 @@ cp .env.docker .env
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/goto-device-locator.git
+git clone https://github.com/oneofthegeeks/goto-device-locator.git
 cd goto-device-locator
 
 # Create virtual environment
@@ -252,7 +252,7 @@ See [DOCKER.md](DOCKER.md) for complete Unraid setup guide.
 ### Local Development Setup
 ```bash
 # Clone repository
-git clone https://github.com/your-username/goto-device-locator.git
+git clone https://github.com/oneofthegeeks/goto-device-locator.git
 cd goto-device-locator
 
 # Create virtual environment
@@ -311,8 +311,8 @@ goto-device-locator/
 - Review Docker logs: `docker logs goto-device-manager`
 
 ### Getting Help
-- **Issues**: [GitHub Issues](https://github.com/your-username/goto-device-locator/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/goto-device-locator/discussions)
+- **Issues**: [GitHub Issues](https://github.com/oneofthegeeks/goto-device-locator/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/oneofthegeeks/goto-device-locator/discussions)
 
 ## 🤝 Contributing
 
