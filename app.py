@@ -686,6 +686,12 @@ def create_app():
     
     return app
 
+# WSGI entrypoint for Gunicorn/Docker. When imported as module "app",
+# Gunicorn expects an `app` variable referencing the Flask application.
+# This was previously only created under `__main__`; defining it here
+# allows container startup via `gunicorn app:app`.
+app = create_app()
+
 if __name__ == '__main__':
     try:
         Config.validate()
